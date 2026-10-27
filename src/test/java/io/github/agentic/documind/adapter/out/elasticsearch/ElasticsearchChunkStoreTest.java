@@ -85,8 +85,16 @@ class ElasticsearchChunkStoreTest {
 
         RetrievedChunk top = results.get(0);
         assertThat(top.chunk().text()).isEqualTo(FRANCE_CAPITAL.text());
-        // Provenance survives the write/read round-trip byte-for-byte (records' equals).
-        assertThat(top.chunk().provenance()).isEqualTo(FRANCE_CAPITAL.provenance());
+
+        // The citation mapping cannot drift: every provenance field must survive the
+        // save -> search round-trip. The whole-record equality is the definitive check;
+        // the per-field assertions name the exact field if one ever breaks.
+        Provenance provenance = top.chunk().provenance();
+        assertThat(provenance).isEqualTo(FRANCE_CAPITAL.provenance());
+        assertThat(provenance.documentId()).isEqualTo("doc-france");
+        assertThat(provenance.filename()).isEqualTo("france.pdf");
+        assertThat(provenance.pageNumber()).isEqualTo(1);
+        assertThat(provenance.chunkIndex()).isEqualTo(0);
 
         // Scores come back most-relevant-first and are never negative (cosine of
         // non-negative bag-of-words vectors; a zero-overlap chunk scores exactly 0).
