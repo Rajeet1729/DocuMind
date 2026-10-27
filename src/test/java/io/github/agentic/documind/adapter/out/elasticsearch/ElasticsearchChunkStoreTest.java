@@ -17,8 +17,9 @@ import org.springframework.ai.embedding.EmbeddingRequest;
 import org.springframework.ai.embedding.EmbeddingResponse;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
@@ -33,8 +34,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * standing in for OpenAI. The OpenAI auto-configurations are excluded, so this test
  * needs no {@code OPENAI_API_KEY} and makes no network calls — the only moving part is
  * the ES container, and the ranking is reproducible run to run.
+ *
+ * <p>The context is scoped to {@link TestApp} (auto-config + the adapter + the fake
+ * embedder) rather than the whole application, so it does not drag in the chat-client
+ * beans — which would demand a {@code ChatModel} the OpenAI exclusion removes.
  */
 @SpringBootTest(
+        classes = ElasticsearchChunkStoreTest.TestApp.class,
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties = {
                 // Deterministic + offline: no OpenAI beans, so no API key and no network.
@@ -117,8 +123,15 @@ class ElasticsearchChunkStoreTest {
         assertThat(chunkStore.search("capital", 2)).hasSize(2);
     }
 
-    @TestConfiguration(proxyBeanMethods = false)
-    static class FakeEmbeddingConfig {
+    /**
+     * Minimal application for this slice: auto-configuration (the ES vector store, Boot's
+     * ES client, the Testcontainers connection) plus the adapter under test and the fake
+     * embedder. Deliberately does <em>not</em> component-scan the services or web layer.
+     */
+    @SpringBootConfiguration
+    @EnableAutoConfiguration
+    @Import(ElasticsearchChunkStore.class)
+    static class TestApp {
 
         // 1536 matches spring.ai.vectorstore.elasticsearch.dimensions in application.properties.
         @Bean
