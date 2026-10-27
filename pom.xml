@@ -47,9 +47,13 @@
 			<groupId>org.springframework.ai</groupId>
 			<artifactId>spring-ai-starter-vector-store-elasticsearch</artifactId>
 		</dependency>
+		<!-- Boot's Elasticsearch client module. Provides the Rest5Client bean the Spring
+		     AI vector-store autoconfig consumes, plus ElasticsearchConnectionDetails for
+		     docker-compose (runtime) and the Testcontainers @ServiceConnection factory
+		     (tests). Not pulled transitively by the Spring AI ES starter under Boot 4.x. -->
 		<dependency>
-			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-vector-store-advisor</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-elasticsearch</artifactId>
 		</dependency>
 		<!-- Page-aware PDF reading (PagePdfDocumentReader). Version managed by the
 		     Spring AI BOM; transitively brings Apache PDFBox. -->
