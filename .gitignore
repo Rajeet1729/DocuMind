@@ -31,4 +31,10 @@ build/
 
 ### Env / secrets ###
 .env
+.env.*
+!.env.example
 *.local.properties
+
+### Local test artifacts (ingestion fixtures — keep out of the repo) ###
+*.pdf
+sample.txt
