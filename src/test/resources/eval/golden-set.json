@@ -1,0 +1,91 @@
+[
+  { "id": "s1", "question": "What meditation app is mentioned, and what free trial does it offer?",
+    "expectedAnswer": "The Waking Up app, which offers a free 30-day trial", "filename": "huberman_sleep.pdf", "relevantPages": [1], "type": "factual" },
+
+  { "id": "s2", "question": "Why does Dr. Walker advise against sleeping on your back?",
+    "expectedAnswer": "It increases the likelihood of snoring or airway collapse, which can cause a hypoxic event", "filename": "huberman_sleep.pdf", "relevantPages": [2], "type": "factual" },
+
+  { "id": "s3", "question": "What percentage of people with sleep apnea are undiagnosed?",
+    "expectedAnswer": "80%", "filename": "huberman_sleep.pdf", "relevantPages": [2], "type": "factual" },
+
+  { "id": "s4", "question": "Roughly how much of lost sleep hours can the body actually recoup?",
+    "expectedAnswer": "About 25%", "filename": "huberman_sleep.pdf", "relevantPages": [3], "type": "factual" },
+
+  { "id": "s5", "question": "Can you pay off a sleep debt on the weekend?",
+    "expectedAnswer": "No — you can't accumulate a sleep debt and pay it off later; the body only recoups ~25% of lost hours", "filename": "huberman_sleep.pdf", "relevantPages": [3], "type": "factual" },
+
+  { "id": "s6", "question": "What dose of glycine is suggested, and what supports its benefit?",
+    "expectedAnswer": "1.5–2 g; it has shown reliable sleep benefits in randomized controlled trials", "filename": "huberman_sleep.pdf", "relevantPages": [6], "type": "factual" },
+
+  { "id": "s7", "question": "What is apigenin derived from, and what does it help with?",
+    "expectedAnswer": "Derived from chamomile; helps reduce anxiety to aid the transition to sleep", "filename": "huberman_sleep.pdf", "relevantPages": [5], "type": "factual" },
+
+  { "id": "s8", "question": "What does the QQRT framework stand for?",
+    "expectedAnswer": "Quality, Quantity, Regularity, and Timing", "filename": "huberman_sleep.pdf", "relevantPages": [5], "type": "factual" },
+
+  { "id": "s9", "question": "For older adults waking too early, what bedtime adjustment is suggested?",
+    "expectedAnswer": "Gradually delay bedtime (e.g., from 10pm to 11pm) to encourage sleeping later into the morning", "filename": "huberman_sleep.pdf", "relevantPages": [4], "type": "factual" },
+
+  { "id": "s10", "question": "What is the single most important tip given for better sleep?",
+    "expectedAnswer": "Keep sleep regularity and timing consistent — same sleep/wake times, even on weekends", "filename": "huberman_sleep.pdf", "relevantPages": [6], "type": "factual" },
+
+  { "id": "s11", "question": "What should you do before reaching for sleep supplements?",
+    "expectedAnswer": "Fix behaviors first (QQRT, light/dark, temperature); supplements are never a first-line approach", "filename": "huberman_sleep.pdf", "relevantPages": [5], "type": "paraphrased" },
+
+  { "id": "s12", "question": "I keep snapping awake around the same time every night — what's going on?",
+    "expectedAnswer": "Likely the end of a sleep cycle and/or a learned habit from clock-checking; removing visible clocks can help", "filename": "huberman_sleep.pdf", "relevantPages": [2,3], "type": "paraphrased" },
+
+  { "id": "s13", "question": "Does forgetting my dreams mean I'm sleeping badly?",
+    "expectedAnswer": "No — most people don't recall most dreams; it doesn't indicate poor sleep or REM quality", "filename": "huberman_sleep.pdf", "relevantPages": [5], "type": "paraphrased" },
+
+  { "id": "s14", "question": "What helps with sleep disruption during menopause?",
+    "expectedAnswer": "Keep the bedroom cool (cooling pad/cover) to offset hot flashes; HRT may help normalize hormonal changes", "filename": "huberman_sleep.pdf", "relevantPages": [4], "type": "paraphrased" },
+
+  { "id": "s15", "question": "If my mind is racing at bedtime, what can I try?",
+    "expectedAnswer": "Meditation/guided relaxation, body scans/NSDR, long-exhale breathing, or a visualized 'mental walk'", "filename": "huberman_sleep.pdf", "relevantPages": [1,2], "type": "paraphrased" },
+
+  { "id": "s16", "question": "Who sponsored this newsletter?",
+    "expectedAnswer": "Eight Sleep", "filename": "huberman_sleep.pdf", "relevantPages": [1], "type": "factual" },
+
+  { "id": "s17", "question": "What magnesium forms are recommended for sleep?",
+    "expectedAnswer": "Magnesium threonate, bisglycinate, or chloride (SlowMag is a gentler coated form)", "filename": "huberman_sleep.pdf", "relevantPages": [5], "type": "factual" },
+
+  { "id": "s18", "question": "What caffeine dosage does the newsletter recommend before bed?",
+    "expectedAnswer": "Not stated in the document", "filename": "huberman_sleep.pdf", "relevantPages": [], "type": "should-return-nothing" },
+
+  { "id": "s19", "question": "What is the author's opinion on weighted blankets?",
+    "expectedAnswer": "Not stated in the document", "filename": "huberman_sleep.pdf", "relevantPages": [], "type": "should-return-nothing" },
+
+  { "id": "s20", "question": "How much does an Eight Sleep Pod Cover cost?",
+    "expectedAnswer": "Not stated in the document", "filename": "huberman_sleep.pdf", "relevantPages": [], "type": "should-return-nothing" },
+
+  { "id": "r1", "question": "How many nodes was the application server cluster expanded to at TCS?",
+    "expectedAnswer": "From 2 to 6 nodes", "filename": "RajeetGoyalResume_jpmc.pdf", "relevantPages": [1], "type": "factual" },
+
+  { "id": "r2", "question": "By how much did query latency reduce after scaling and tuning ElasticSearch?",
+    "expectedAnswer": "35%", "filename": "RajeetGoyalResume_jpmc.pdf", "relevantPages": [1], "type": "factual" },
+
+  { "id": "r3", "question": "What search throughput (QPS) was achieved after the ElasticSearch tuning?",
+    "expectedAnswer": "300+ QPS", "filename": "RajeetGoyalResume_jpmc.pdf", "relevantPages": [1], "type": "factual" },
+
+  { "id": "r4", "question": "What is the candidate's CGPA and from which university?",
+    "expectedAnswer": "CGPA 7.87 from Chandigarh University", "filename": "RajeetGoyalResume_jpmc.pdf", "relevantPages": [1], "type": "factual" },
+
+  { "id": "r5", "question": "Which embedding model was used in the DocuMind project?",
+    "expectedAnswer": "OpenAI's text-embedding-3-small", "filename": "RajeetGoyalResume_jpmc.pdf", "relevantPages": [1], "type": "factual" },
+
+  { "id": "r6", "question": "What messaging technology did the candidate use for event-driven data flows?",
+    "expectedAnswer": "Apache Kafka", "filename": "RajeetGoyalResume_jpmc.pdf", "relevantPages": [1], "type": "paraphrased" },
+
+  { "id": "r7", "question": "Does the candidate have hands-on work-project experience with Liferay DXP?",
+    "expectedAnswer": "Liferay DXP is listed under the candidate's frameworks/skills, but the work experience does not describe using it on a specific project", "filename": "RajeetGoyalResume_jpmc.pdf", "relevantPages": [1], "type": "paraphrased" },
+
+  { "id": "r8", "question": "What recognition did the candidate receive at TCS?",
+    "expectedAnswer": "3x Star of the Month Award (for backend stability and cloud migration)", "filename": "RajeetGoyalResume_jpmc.pdf", "relevantPages": [1], "type": "paraphrased" },
+
+  { "id": "r9", "question": "What professional certifications in cloud architecture does the candidate hold?",
+    "expectedAnswer": "Not stated in the document", "filename": "RajeetGoyalResume_jpmc.pdf", "relevantPages": [], "type": "should-return-nothing" },
+
+  { "id": "r10", "question": "What programming language does the candidate prefer for frontend development?",
+    "expectedAnswer": "Not stated in the document", "filename": "RajeetGoyalResume_jpmc.pdf", "relevantPages": [], "type": "should-return-nothing" }
+]
