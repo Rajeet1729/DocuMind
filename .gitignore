@@ -38,3 +38,7 @@ build/
 ### Local test artifacts (ingestion fixtures — keep out of the repo) ###
 *.pdf
 sample.txt
+
+# Eval corpus: commit the public Huberman sleep PDF so the golden set is reproducible;
+# keep the personal résumé out of the repo (still matched by *.pdf above).
+!src/test/resources/eval/corpus/huberman_sleep.pdf

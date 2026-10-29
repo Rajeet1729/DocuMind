@@ -109,6 +109,17 @@
 			<artifactId>testcontainers-junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- Token counting for the eval harness's *estimated* cost summary. jtokkit is a
+		     pure-Java BPE tokenizer with the OpenAI encodings (o200k_base covers the
+		     gpt-4o/gpt-5/gpt-6 family); used only to estimate embedding and generation
+		     token counts, which carry no usage metadata back to the harness. Judge calls
+		     report their real usage from the API, so those are not estimated. Test-only. -->
+		<dependency>
+			<groupId>com.knuddels</groupId>
+			<artifactId>jtokkit</artifactId>
+			<version>1.1.0</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
@@ -122,11 +133,64 @@
 		</dependencies>
 	</dependencyManagement>
 
+	<profiles>
+		<!-- Run the paid eval harness on demand: `./mvnw test -Peval`. Clears the default
+		     eval exclusion and runs ONLY eval-tagged tests. -->
+		<profile>
+			<id>eval</id>
+			<!-- Judge model for the faithfulness harness. Default is the self-judge; swap
+			     to a cross-model judge on the command line, no code edit:
+			     `./mvnw test -Peval -Ddocumind.eval.judge-model=gpt-6-sol`. -->
+			<properties>
+				<documind.eval.judge-model>gpt-6-luna</documind.eval.judge-model>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<excludedGroups combine.self="override"></excludedGroups>
+							<groups>eval</groups>
+							<!-- Harness classes are *Evaluation, not *Test, so the default
+							     build never even considers them; include them here. -->
+							<includes>
+								<include>**/eval/*Evaluation.java</include>
+							</includes>
+							<!-- Mirror production ingestion: the app runs without -ea, but
+							     Surefire enables it by default, which trips PDFBox's internal
+							     asserts on some real PDFs. The harness ingests exactly as prod
+							     does, so assertions are off here. -->
+							<enableAssertions>false</enableAssertions>
+							<!-- Surefire forks a JVM; forward the judge-model property so the
+							     @Value in the harness picks up the command-line override. -->
+							<systemPropertyVariables>
+								<documind.eval.judge-model>${documind.eval.judge-model}</documind.eval.judge-model>
+							</systemPropertyVariables>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<!-- The eval harness (@Tag("eval")) makes real, paid OpenAI calls, so it must
+			     NEVER run in the normal build. Exclude the tag by default; run it on demand
+			     with the `eval` profile (`./mvnw test -Peval`), which clears the exclusion
+			     and includes only that tag. A plain -Dgroups=eval would NOT work: an
+			     excludedGroups set here always wins over an included group. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<excludedGroups>eval</excludedGroups>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
