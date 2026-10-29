@@ -96,8 +96,18 @@ class FaithfulnessEvaluation {
 	@Value("${documind.eval.judge-model:gpt-6-luna}")
 	private String judgeModel;
 
+	@Value("${documind.retrieval.hybrid.enabled:false}")
+	private boolean hybridEnabled;
+
+	@Value("${documind.retrieval.hybrid.candidate-k:20}")
+	private int candidateK;
+
+	@Value("${documind.retrieval.hybrid.rrf-k:60}")
+	private int rrfK;
+
 	private List<GoldenEntry> golden;
 	private final List<String> ingestedFiles = new ArrayList<>();
+	private final java.util.Map<String, Integer> chunkCountByFile = new java.util.LinkedHashMap<>();
 	private CostModel cost;
 
 	@BeforeAll
@@ -123,6 +133,7 @@ class FaithfulnessEvaluation {
 			List<Chunk> chunks = chunker.chunk(UUID.randomUUID().toString(), filename, bytes);
 			chunkStore.save(chunks);
 			ingestedFiles.add(filename);
+			chunkCountByFile.put(filename, chunks.size());
 			chunks.forEach(c -> cost.addCorpusEmbedding(c.text()));
 		});
 
@@ -142,7 +153,7 @@ class FaithfulnessEvaluation {
 		for (GoldenEntry e : golden) {
 			if (!ingestedFiles.contains(e.filename())) {
 				printLine(e.id(), e.type(), "SKIP", "source file '" + e.filename() + "' not ingested");
-				report.add(new RunReport.QResult(e.id(), e.type(), e.question(), "",
+				report.add(new RunReport.QResult(e.id(), e.type(), e.filename(), e.question(), "",
 						List.of(), null, null, e.relevantPages(), "SKIP",
 						"source file '" + e.filename() + "' not ingested", e.isShouldReturnNothing()));
 				continue;
@@ -165,7 +176,7 @@ class FaithfulnessEvaluation {
 				String verdict = !j.parsed() ? "UNPARSEABLE"
 						: j.abstained() ? "ABSTAIN-OK" : "FAIL-answered";
 				printLine(e.id(), e.type(), verdict, j.rationale());
-				report.add(new RunReport.QResult(e.id(), e.type(), e.question(), answer.text(),
+				report.add(new RunReport.QResult(e.id(), e.type(), e.filename(), e.question(), answer.text(),
 						ranked, null, null, e.relevantPages(), verdict, j.rationale(), true));
 			}
 			else {
@@ -177,7 +188,7 @@ class FaithfulnessEvaluation {
 				FaithfulnessJudgement j = judge.judgeFaithfulness(e.question(), context, answer.text());
 				cost.addJudge(j.promptTokens(), j.completionTokens());
 				printLine(e.id(), e.type(), j.grade().name(), j.rationale());
-				report.add(new RunReport.QResult(e.id(), e.type(), e.question(), answer.text(),
+				report.add(new RunReport.QResult(e.id(), e.type(), e.filename(), e.question(), answer.text(),
 						ranked, hit1, hitK, e.relevantPages(), j.grade().name(), j.rationale(), false));
 			}
 		}
@@ -200,8 +211,14 @@ class FaithfulnessEvaluation {
 	private List<String> runMetaLines(Judge judge, String stamp) {
 		return List.of(
 				"timestamp=" + stamp,
+				"retrieval=" + retrievalMode() + "  chunks/doc=" + chunkCountByFile,
 				"generationModel=" + generationModel + "  judgeModel=" + judge.judgeModel(),
 				"topK=" + topK + "  entries=" + golden.size() + "  ingested=" + ingestedFiles);
+	}
+
+	private String retrievalMode() {
+		return hybridEnabled ? "hybrid(BM25+vector RRF, candidateK=" + candidateK + ", rrfK=" + rrfK + ")"
+				: "vector-only";
 	}
 
 	private static List<RunReport.Retrieved> toRanked(List<RetrievedChunk> retrieved) {
@@ -231,6 +248,7 @@ class FaithfulnessEvaluation {
 		System.out.println(" DocuMind answer eval — faithfulness + abstention (Step 2, PAID)");
 		System.out.println(" entries = " + golden.size() + "   top-k = " + topK
 				+ "   ingested = " + ingestedFiles);
+		System.out.println(" chunks/doc = " + chunkCountByFile + "   retrieval = " + retrievalMode());
 		System.out.println(" generation model = " + generationModel
 				+ "   judge model = " + judge.judgeModel());
 		System.out.println("==================================================================");

@@ -39,7 +39,7 @@ final class RunReport {
 	 * should-return-nothing and skipped entries; {@code verdict} is the faithfulness grade,
 	 * an abstention outcome ({@code ABSTAIN-OK}/{@code FAIL-answered}), or {@code SKIP}.
 	 */
-	record QResult(String id, String type, String question, String answer,
+	record QResult(String id, String type, String filename, String question, String answer,
 			List<Retrieved> retrieved, Boolean hit1, Boolean hitK,
 			List<Integer> expectedPages, String verdict, String rationale, boolean srn) {
 	}
@@ -104,6 +104,27 @@ final class RunReport {
 				type, t[0], pct(t[1], t[0]), pct(t[2], t[0]))));
 		out.add(String.format("   %-14s %5d %14s %14s", "OVERALL", retrAll[0],
 				pct(retrAll[1], retrAll[0]), pct(retrAll[2], retrAll[0])));
+		out.add("");
+
+		// --- retrieval hit-rate by document (makes a per-corpus divergence visible) ---
+		out.add(" RETRIEVAL hit-rate by document");
+		Map<String, int[]> byDoc = new LinkedHashMap<>();
+		for (QResult r : results) {
+			if (r.hit1() == null) {
+				continue;
+			}
+			int[] d = byDoc.computeIfAbsent(r.filename(), k -> new int[3]);
+			d[0]++;
+			if (r.hit1()) {
+				d[1]++;
+			}
+			if (r.hitK()) {
+				d[2]++;
+			}
+		}
+		out.add(String.format("   %-30s %5s %14s %14s", "document", "n", "hit@1", "hit@k"));
+		byDoc.forEach((doc, d) -> out.add(String.format("   %-30s %5d %14s %14s",
+				doc, d[0], pct(d[1], d[0]), pct(d[2], d[0]))));
 		out.add("");
 
 		// --- faithfulness (headline = share SUPPORTED) ---
