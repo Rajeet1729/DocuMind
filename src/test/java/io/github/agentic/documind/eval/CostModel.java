@@ -78,6 +78,12 @@ final class CostModel {
 	private long judgeOutputTokens;
 	private int judgeCalls;
 
+	// Measured (from API usage): the agentic loop's in-retrieval calls (gate + reformulation),
+	// made on the generation model. Zero for single-shot runs, and then not printed.
+	private long reasoningInputTokens;
+	private long reasoningOutputTokens;
+	private int reasoningCalls;
+
 	/** Token count for a chat-model string (o200k_base). */
 	int chatTokens(String text) {
 		return text == null ? 0 : chatEnc.countTokens(text);
@@ -106,6 +112,13 @@ final class CostModel {
 		judgeInputTokens += promptTokens;
 		judgeOutputTokens += completionTokens;
 		judgeCalls++;
+	}
+
+	/** One question's agentic reasoning calls (gate + reformulation): real token usage from the API. */
+	void addReasoning(int calls, int promptTokens, int completionTokens) {
+		reasoningInputTokens += promptTokens;
+		reasoningOutputTokens += completionTokens;
+		reasoningCalls += calls;
 	}
 
 	private static Rate rate(String model) {
@@ -152,7 +165,7 @@ final class CostModel {
 	/** The cost summary as text lines, shared by the console print and the persisted file. */
 	List<String> summaryLines() {
 		double embed = embeddingUsd();
-		double gen = generationUsd();
+		double gen = generationUsd() + chatUsd(GEN_MODEL, reasoningInputTokens, reasoningOutputTokens);
 		Double judge = judgeUsd();
 		Rate genRate = rate(GEN_MODEL);
 		Rate judgeRate = rate(judgeModel);
@@ -171,7 +184,12 @@ final class CostModel {
 				"embeddings: queries", embedQueryTokens, "-", "", embedQueryCalls));
 		out.add(String.format("   %-26s %10s %10s %12s", "  embeddings subtotal", "", "", usd(embed)));
 		out.add(String.format("   %-26s %10d %10d %12s   [est] %d calls",
-				"generation (" + GEN_MODEL + ")", genInputTokens, genOutputTokens, usd(gen), genCalls));
+				"generation (" + GEN_MODEL + ")", genInputTokens, genOutputTokens, usd(generationUsd()), genCalls));
+		if (reasoningCalls > 0) {
+			out.add(String.format("   %-26s %10d %10d %12s   [measured] %d calls",
+					"agentic reasoning", reasoningInputTokens, reasoningOutputTokens,
+					usd(chatUsd(GEN_MODEL, reasoningInputTokens, reasoningOutputTokens)), reasoningCalls));
+		}
 		out.add(String.format("   %-26s %10d %10d %12s   [measured] %d calls",
 				"judge (" + judgeModel + ")", judgeInputTokens, judgeOutputTokens,
 				judge == null ? "n/a" : usd(judge), judgeCalls));
@@ -181,7 +199,8 @@ final class CostModel {
 		out.add("");
 		out.add("   generation input includes a ~" + GEN_SCAFFOLD_TOKENS
 				+ "-token/call fixed prompt+framing allowance the harness cannot observe.");
-		out.add("   embeddings & generation are jtokkit ESTIMATES; judge tokens are MEASURED.");
+		out.add("   embeddings & generation are jtokkit ESTIMATES; judge"
+				+ (reasoningCalls > 0 ? " and agentic reasoning" : "") + " tokens are MEASURED.");
 		if (judgeRate == null) {
 			out.add("   ! no rate on file for judge model '" + judgeModel
 					+ "' — judge $ omitted; add it to CostModel.CHAT_RATES.");

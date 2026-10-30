@@ -26,7 +26,7 @@ class QuestionAnsweringServiceTest {
     private final ChunkStore chunkStore = mock(ChunkStore.class);
     private final ChatClient chatClient = mock(ChatClient.class, RETURNS_DEEP_STUBS);
     private final QuestionAnsweringService service =
-            new QuestionAnsweringService(chunkStore, chatClient, 3);
+            new QuestionAnsweringService(new SingleShotRetrieval(chunkStore), chatClient, 3);
 
     private static RetrievedChunk retrieved(String text, String file, int page, int index, double score) {
         return new RetrievedChunk(new Chunk(text, new Provenance("doc", file, page, index)), score);

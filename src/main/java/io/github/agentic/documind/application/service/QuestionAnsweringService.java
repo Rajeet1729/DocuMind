@@ -1,7 +1,6 @@
 package io.github.agentic.documind.application.service;
 
 import io.github.agentic.documind.application.port.in.AskQuestionUseCase;
-import io.github.agentic.documind.application.port.out.ChunkStore;
 import io.github.agentic.documind.domain.Answer;
 import io.github.agentic.documind.domain.Citation;
 import io.github.agentic.documind.domain.Provenance;
@@ -25,6 +24,10 @@ import java.util.List;
  * <p>Context building and citation derivation are plain, deterministic methods so they
  * can be unit-tested without a model; the {@link ChatClient} is injected directly so it
  * can be mocked in the orchestration tests.
+ *
+ * <p>How the context is assembled is the {@link RetrievalStrategy}'s job (single-shot by
+ * default, the agentic loop behind a flag). Either way it hands back at most {@code topK}
+ * chunks and this service grounds on them with the same prompt.
  */
 @Service
 public class QuestionAnsweringService implements AskQuestionUseCase {
@@ -39,20 +42,20 @@ public class QuestionAnsweringService implements AskQuestionUseCase {
             context passages provided. If the answer is not contained in the context, say you
             don't know. Cite the passages you rely on by their number, e.g. [1].""";
 
-    private final ChunkStore chunkStore;
+    private final RetrievalStrategy retrievalStrategy;
     private final ChatClient chatClient;
     private final int topK;
 
-    public QuestionAnsweringService(ChunkStore chunkStore, ChatClient chatClient,
+    public QuestionAnsweringService(RetrievalStrategy retrievalStrategy, ChatClient chatClient,
                                     @Value("${documind.retrieval.top-k:4}") int topK) {
-        this.chunkStore = chunkStore;
+        this.retrievalStrategy = retrievalStrategy;
         this.chatClient = chatClient;
         this.topK = topK;
     }
 
     @Override
     public Answer ask(String question) {
-        List<RetrievedChunk> retrieved = chunkStore.search(question, topK);
+        List<RetrievedChunk> retrieved = retrievalStrategy.retrieve(question, topK).context();
         if (retrieved.isEmpty()) {
             // Nothing to ground on: return a canned answer rather than prompt the model
             // without context (which would invite an ungrounded, uncitable reply).

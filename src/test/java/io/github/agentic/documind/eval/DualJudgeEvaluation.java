@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * Slice-2 <b>fixed-answer dual-judge A/B</b> — a deliberate, standalone experiment, not
  * part of a normal run.
@@ -87,6 +89,9 @@ class DualJudgeEvaluation {
 	@Value("${documind.eval.frozen-answers:}")
 	private String frozenAnswersPath;
 
+	@Value("${documind.retrieval.agentic.enabled:false}")
+	private boolean agenticEnabled;
+
 	private List<GoldenEntry> golden;
 	private final List<String> ingestedFiles = new ArrayList<>();
 	private final CostModel estimator = new CostModel("gpt-6-luna"); // used only for token estimates
@@ -100,6 +105,9 @@ class DualJudgeEvaluation {
 
 	@BeforeAll
 	void maybeIngestCorpus() {
+		assertThat(agenticEnabled).as("this harness re-derives the judge's context with a second "
+				+ "search(), which only matches the pipeline's context when retrieval is deterministic "
+				+ "single-shot; evaluate the agentic loop with AgenticEvaluation").isFalse();
 		golden = GoldenSet.load();
 		reuseFrozen = frozenAnswersPath != null && !frozenAnswersPath.isBlank()
 				&& Files.exists(Path.of(frozenAnswersPath));

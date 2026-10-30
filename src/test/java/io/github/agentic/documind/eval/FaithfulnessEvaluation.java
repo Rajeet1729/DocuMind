@@ -105,6 +105,9 @@ class FaithfulnessEvaluation {
 	@Value("${documind.retrieval.hybrid.rrf-k:60}")
 	private int rrfK;
 
+	@Value("${documind.retrieval.agentic.enabled:false}")
+	private boolean agenticEnabled;
+
 	private List<GoldenEntry> golden;
 	private final List<String> ingestedFiles = new ArrayList<>();
 	private final java.util.Map<String, Integer> chunkCountByFile = new java.util.LinkedHashMap<>();
@@ -112,6 +115,9 @@ class FaithfulnessEvaluation {
 
 	@BeforeAll
 	void ingestCorpusOnce() {
+		assertThat(agenticEnabled).as("this harness re-derives the judge's context with a second "
+				+ "search(), which only matches the pipeline's context when retrieval is deterministic "
+				+ "single-shot; evaluate the agentic loop with AgenticEvaluation").isFalse();
 		golden = GoldenSet.load();
 		cost = new CostModel(judgeModel);
 
